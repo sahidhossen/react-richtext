@@ -1,0 +1,19 @@
+.postcil-inline-toolbar {
+    position: absolute;
+    z-index: 1;
+    top: -10000px;
+    left: -10000px;
+    margin-top: -6px;
+    opacity: 0;
+    background-color: rgb(34, 34, 34);
+    padding: 8px 7px 6px;
+    border-radius: 4px;
+    transition: opacity 0.75s ease 0s;
+        .postcil-inilne-editor-btn  {
+            cursor: pointer;
+            color: rgb(170, 170, 170);
+            span {
+                padding: 0 4px;
+            }
+        }
+}
