@@ -5,7 +5,8 @@ export default class App extends React.Component {
     constructor(props){
         super()
         this.state = {
-            value: '<h3>Lets start with rich text editor</h3>'
+            value: '<h3>Lets start with rich text editor</h3>',
+            multiline: false
         }
     }
     render(){
@@ -13,10 +14,10 @@ export default class App extends React.Component {
         return (
             <div className="app-container">
                 <h3 className="title"> This is initial apps </h3>
-
+                <h4> State: {this.state.multiline ? 'multiline' : 'single line'} </h4>
                 <RichText
                     value={this.state.value}
-                    multiline={false}
+                    multiline={true}
                     tagName='h3'
                     onChange={(value)=> this.setState({ value }) }
                     placeholder={'Write Text...'}

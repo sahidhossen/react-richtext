@@ -4,7 +4,7 @@ import { rules } from './rules';
 import { BLOCK_TAGS, MARK_TAGS }  from './marks';
 
 // Create a new serializer instance with our `rules` from above.
-export const html = new Html({ rules, defaultBlock:'paragraph' })
+export const html = new Html({ rules, defaultBlock:'div' })
 
 
 export const isMark = ( type ) => {

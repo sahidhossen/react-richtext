@@ -72297,33 +72297,6 @@ module.exports = setup;
 
 /***/ }),
 
-/***/ "./node_modules/slate-soft-break/lib/slate-soft-break.es.js":
-/*!******************************************************************!*\
-  !*** ./node_modules/slate-soft-break/lib/slate-soft-break.es.js ***!
-  \******************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-function SoftBreak() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-  return {
-    onKeyDown: function onKeyDown(event, change, next) {
-      if (event.key !== 'Enter') return next();
-      if (options.shift && event.shiftKey === false) return next();
-      return change.insertText('\n');
-    }
-  };
-}
-
-/* harmony default export */ __webpack_exports__["default"] = (SoftBreak);
-//# sourceMappingURL=slate-soft-break.es.js.map
-
-
-/***/ }),
-
 /***/ "./node_modules/slate/lib/slate.es.js":
 /*!********************************************!*\
   !*** ./node_modules/slate/lib/slate.es.js ***!
@@ -91303,7 +91276,8 @@ var App = function (_React$Component) {
         var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this));
 
         _this.state = {
-            value: '<h3>Lets start with rich text editor</h3>'
+            value: '<h3>Lets start with rich text editor</h3>',
+            multiline: false
         };
         return _this;
     }
@@ -91322,9 +91296,16 @@ var App = function (_React$Component) {
                     { className: 'title' },
                     ' This is initial apps '
                 ),
+                _react2.default.createElement(
+                    'h4',
+                    null,
+                    ' State: ',
+                    this.state.multiline ? 'multiline' : 'single line',
+                    ' '
+                ),
                 _react2.default.createElement(_richText2.default, {
                     value: this.state.value,
-                    multiline: false,
+                    multiline: true,
                     tagName: 'h3',
                     onChange: function onChange(value) {
                         return _this2.setState({ value: value });
@@ -91825,9 +91806,7 @@ var _react2 = _interopRequireDefault(_react);
 
 var _slateReact = __webpack_require__(/*! slate-react */ "./node_modules/slate-react/lib/slate-react.es.js");
 
-var _slateSoftBreak = __webpack_require__(/*! slate-soft-break */ "./node_modules/slate-soft-break/lib/slate-soft-break.es.js");
-
-var _slateSoftBreak2 = _interopRequireDefault(_slateSoftBreak);
+var _plugins = __webpack_require__(/*! ./plugins */ "./src/components/richText/plugins.js");
 
 var _InlineToolbar = __webpack_require__(/*! ./InlineToolbar */ "./src/components/richText/InlineToolbar.js");
 
@@ -91851,8 +91830,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var _window = window,
     getSelection = _window.getSelection;
 
-var plugins = [(0, _slateSoftBreak2.default)({ shift: true })];
-
 var RichText = function (_React$Component) {
   _inherits(RichText, _React$Component);
 
@@ -91861,17 +91838,23 @@ var RichText = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, (RichText.__proto__ || Object.getPrototypeOf(RichText)).call(this, props));
 
-    var value = _this.props.value;
-    if (props.multiline && props.multiline === false) {
-      value = (0, _toDom.parsePlainContent)(value, '');
+    var value = props.value;
+    var tag = typeof props.tag === 'undefined' ? 'div' : props.tag;
+    if (typeof props.multiline !== 'undefined' && props.multiline === false) {
+      value = (0, _toDom.parsePlainContent)(value, tag);
     }
 
     _this.state = {
       value: _toDom.html.deserialize(value),
       content: value,
-      multiline: typeof props.multiline === 'undefined' ? true : props.multiline
+      multiline: typeof props.multiline === 'undefined' ? true : props.multiline,
+      tag: tag
     };
+
+    _this.plugins = [(0, _plugins.SoftBreak)({ multiline: _this.state.multiline })];
+
     _this.updateMenu = _this.updateMenu.bind(_this);
+
     return _this;
   }
 
@@ -91947,7 +91930,7 @@ var RichText = function (_React$Component) {
         _react.Fragment,
         null,
         children,
-        this.state.multiline && _react2.default.createElement(_InlineToolbar2.default, { setRef: this.setRef.bind(this), editor: editor })
+        _react2.default.createElement(_InlineToolbar2.default, { setRef: this.setRef.bind(this), editor: editor })
       );
     }
 
@@ -92151,16 +92134,19 @@ var RichText = function (_React$Component) {
     key: 'onChange',
     value: function onChange(_ref) {
       var value = _ref.value;
-      var content = this.state.content;
+      var _state = this.state,
+          content = _state.content,
+          tag = _state.tag;
 
       if (value.document != this.state.value.document) {
         content = _toDom.html.serialize(value);
-
+        console.log("content: ", content, value);
         if (this.props.multiline === false) {
-          content = (0, _toDom.parsePlainContent)(content);
+          content = (0, _toDom.parsePlainContent)(content, tag);
+          // value = html.deserialize( content )
         }
       }
-      // console.log("content: ", content)
+
       this.setState({ value: value, content: content });
       this.props.onChange(content);
     }
@@ -92180,21 +92166,10 @@ var RichText = function (_React$Component) {
   }, {
     key: 'onKeyDown',
     value: function onKeyDown(event, editor, next) {
+      console.log("key", event.keyCode);
       if (event.keyCode === _keycodes.ENTER) {
 
-        // Return false if multiline false
-        // if( this.state.multiline === false ){
-        //   return;
-        // }
-
-        if (event.metaKey) {
-          var isList = (0, _toDom.hasBlock)('list-item', editor.value);
-          if (isList) {
-            editor.setBlocks(_marks.BLOCK_TAGS.p).unwrapBlock('bulleted-list').unwrapBlock('numbered-list');
-          }
-        } else {
-          return next();
-        }
+        return next();
       } else {
         return next();
       }
@@ -92247,7 +92222,7 @@ var RichText = function (_React$Component) {
         renderBlock: this.renderNode.bind(this),
         renderMark: this.renderMark.bind(this),
         renderInline: this.renderInline.bind(this),
-        plugins: plugins
+        plugins: this.plugins
       });
     }
   }]);
@@ -92282,13 +92257,12 @@ var UP = exports.UP = 38;
 var RIGHT = exports.RIGHT = 39;
 var DOWN = exports.DOWN = 40;
 var DELETE = exports.DELETE = 46;
-
+var SHIFT = exports.SHIFT = 16;
 var F10 = exports.F10 = 121;
 
 var ALT = exports.ALT = 'alt';
 var CTRL = exports.CTRL = 'ctrl';
 var COMMAND = exports.COMMAND = 'meta';
-var SHIFT = exports.SHIFT = 'shift';
 
 /***/ }),
 
@@ -92349,6 +92323,40 @@ var colors = exports.colors = {
     green: 'G',
     reset: 'Clean'
 };
+
+/***/ }),
+
+/***/ "./src/components/richText/plugins.js":
+/*!********************************************!*\
+  !*** ./src/components/richText/plugins.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.SoftBreak = SoftBreak;
+function SoftBreak() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  return {
+    onKeyDown: function onKeyDown(event, change, next) {
+      if (event.key !== 'Enter') return next();
+      if (options.multiline === false) {
+        return change.insertText('\n');
+      }
+      // If multiline false and prease enter+shift add break tag
+      if (options.multiline === true && event.shiftKey === true) {
+        return change.insertText('\n');
+      }
+      return next();
+    }
+  };
+}
 
 /***/ }),
 
@@ -92414,7 +92422,7 @@ var rules = exports.rules = [{
         case 'div':
           return _react2.default.createElement(
             'div',
-            { className: obj.data.get('className') + ' extra-div' },
+            { className: '' + obj.data.get('className') },
             children
           );
         case 'quote':
@@ -92634,7 +92642,7 @@ var _marks = __webpack_require__(/*! ./marks */ "./src/components/richText/marks
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // Create a new serializer instance with our `rules` from above.
-var html = exports.html = new _slateHtmlSerializer2.default({ rules: _rules.rules, defaultBlock: 'paragraph' });
+var html = exports.html = new _slateHtmlSerializer2.default({ rules: _rules.rules, defaultBlock: 'div' });
 
 var isMark = exports.isMark = function isMark(type) {
     return Object.keys(_marks.MARK_TAGS).filter(function (tag) {

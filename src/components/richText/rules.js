@@ -30,7 +30,7 @@ export const rules = [
             case 'paragraph':
               return <p className={obj.data.get('className')}>{children}</p>
             case 'div':
-              return <div className={`${obj.data.get('className')} extra-div`}>{children}</div>
+              return <div className={`${obj.data.get('className')}`}>{children}</div>
             case 'quote':
               return <blockquote>{children}</blockquote>
             case 'bulleted-list':

@@ -8,10 +8,9 @@ export const UP = 38;
 export const RIGHT = 39;
 export const DOWN = 40;
 export const DELETE = 46;
-
+export const SHIFT = 16;
 export const F10 = 121;
 
 export const ALT = 'alt';
 export const CTRL = 'ctrl';
 export const COMMAND = 'meta';
-export const SHIFT = 'shift';

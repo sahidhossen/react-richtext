@@ -1,32 +1,38 @@
 import React, { Fragment } from 'react';
 import { Editor, getEventTransfer } from 'slate-react';
-import SoftBreak from 'slate-soft-break'
+import {SoftBreak} from './plugins'
 import InlineToolbar from './InlineToolbar';
 import { html, hasBlock, parsePlainContent, filterOnlyMarkup } from './to-dom';
-import { ENTER } from './keycodes';
+import { ENTER, SHIFT } from './keycodes';
 import { BLOCK_TAGS } from './marks';
 
 // const { getSelection } = window.frames['sp-pagebuilder-view'].window;
 const { getSelection } = window;
-const plugins = [
-  SoftBreak({ shift: true })
-]
 
 
 class RichText extends React.Component {
     constructor (props) {
       super(props)
-      let value = this.props.value;
-      if( props.multiline && props.multiline === false ){
-        value = parsePlainContent(value, '')
-      }
 
+      let value = props.value;
+      let tag = typeof props.tag === 'undefined' ? 'div' : props.tag
+      if( typeof props.multiline !== 'undefined' && props.multiline === false ){
+        value = parsePlainContent(value, tag)
+      }
+      
       this.state = {
         value: html.deserialize(value),
         content: value,
-        multiline: typeof props.multiline === 'undefined' ? true : props.multiline
+        multiline: typeof props.multiline === 'undefined' ? true : props.multiline,
+        tag: tag
       }
+
+      this.plugins = [
+        SoftBreak({ multiline: this.state.multiline })
+      ]
+
       this.updateMenu = this.updateMenu.bind(this)
+
     }
     
      /**
@@ -90,7 +96,7 @@ class RichText extends React.Component {
       return (
         <Fragment>
           {children}
-          {this.state.multiline && <InlineToolbar setRef={this.setRef.bind(this)} editor={editor} /> }
+          {<InlineToolbar setRef={this.setRef.bind(this)} editor={editor} /> }
         </Fragment>
       )
     }
@@ -200,15 +206,16 @@ class RichText extends React.Component {
      */
 
     onChange ({ value }){
-      let { content } = this.state;
+      let { content, tag } = this.state;
       if (value.document != this.state.value.document) {
         content = html.serialize(value)
-
+        console.log("content: ", content, value)
         if( this.props.multiline === false ){
-          content = parsePlainContent(content)
+          content = parsePlainContent(content, tag)
+          // value = html.deserialize( content )
         }
       }
-      // console.log("content: ", content)
+      
       this.setState({ value, content })
       this.props.onChange(content)
     }
@@ -225,24 +232,10 @@ class RichText extends React.Component {
      * @param {func} next 
      */
     onKeyDown(event, editor, next){
+      console.log("key", event.keyCode)
       if( event.keyCode === ENTER ){
-
-          // Return false if multiline false
-          // if( this.state.multiline === false ){
-          //   return;
-          // }
-
-          if( event.metaKey ){
-            const isList = hasBlock('list-item', editor.value)
-            if( isList ){
-                editor
-                .setBlocks(BLOCK_TAGS.p)
-                .unwrapBlock('bulleted-list')
-                .unwrapBlock('numbered-list')
-            }
-          } else{
-            return next()    
-          }
+         
+          return next()
       } else {
         return next()
       }
@@ -276,7 +269,7 @@ class RichText extends React.Component {
     render() {
       let { placeholder } = this.props 
       placeholder = typeof placeholder === 'undefined' ? 'Write paragraph...' : placeholder
-     
+      
       return (
           <Editor
             placeholder={placeholder}
@@ -288,7 +281,7 @@ class RichText extends React.Component {
             renderBlock={this.renderNode.bind(this)}
             renderMark={this.renderMark.bind(this)}
             renderInline={this.renderInline.bind(this)}
-            plugins={plugins}
+            plugins={this.plugins}
           />
           
       )
