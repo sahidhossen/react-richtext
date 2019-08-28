@@ -155,19 +155,23 @@ export default class InlineToolbar extends React.Component {
     }
     event.preventDefault();
     if(isBlock( type ) ){
+      let transformBlockType = transformBlock(type, editor)
       if (type !== 'bulleted-list' && type !== 'numbered-list') {
         const isList = hasBlock('list-item', editor.value)
         if( isList ){
-            editor.setBlocks( transformBlock(type, editor) )
+            editor.setBlocks( transformBlockType )
                 .unwrapBlock('bulleted-list')
                 .unwrapBlock('numbered-list')
         }else{
-          editor.setBlocks( transformBlock(type, editor) )
+          editor.setBlocks( transformBlockType )
         } 
       }else{
         // Handle the extra wrapping required for list buttons.
         this.updateListItem(editor, type)
       }
+      console.log("editor: ", editor.value.blocks)
+      this.props.onBlockChange(transformBlockType)
+
     }else if( type === 'link') {
       if( hasInline('link',  editor.value) ){
         editor.command(this.unwrapLink)
@@ -175,7 +179,6 @@ export default class InlineToolbar extends React.Component {
         this.setState({ link: true })
       }
     }else if( type === 'span' ) {
-      console.log("inlie: ", type)
        if( hasInline(type, editor.value)  && color === 'reset' ){
           editor.unwrapInline(type)
        }else if( hasInline(type, editor.value) ){
@@ -186,6 +189,7 @@ export default class InlineToolbar extends React.Component {
     }else{
       editor.toggleMark(type)
     }
+    
   }
   
   bindToolbar(node){

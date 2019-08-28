@@ -91305,8 +91305,8 @@ var App = function (_React$Component) {
                 ),
                 _react2.default.createElement(_richText2.default, {
                     value: this.state.value,
-                    multiline: true,
-                    tagName: 'h3',
+                    multiline: false,
+                    tag: 'h3',
                     onChange: function onChange(value) {
                         return _this2.setState({ value: value });
                     },
@@ -91585,17 +91585,20 @@ var InlineToolbar = function (_React$Component) {
       }
       event.preventDefault();
       if ((0, _toDom.isBlock)(type)) {
+        var transformBlockType = (0, _toDom.transformBlock)(type, editor);
         if (type !== 'bulleted-list' && type !== 'numbered-list') {
           var isList = (0, _toDom.hasBlock)('list-item', editor.value);
           if (isList) {
-            editor.setBlocks((0, _toDom.transformBlock)(type, editor)).unwrapBlock('bulleted-list').unwrapBlock('numbered-list');
+            editor.setBlocks(transformBlockType).unwrapBlock('bulleted-list').unwrapBlock('numbered-list');
           } else {
-            editor.setBlocks((0, _toDom.transformBlock)(type, editor));
+            editor.setBlocks(transformBlockType);
           }
         } else {
           // Handle the extra wrapping required for list buttons.
           this.updateListItem(editor, type);
         }
+        console.log("editor: ", editor.value.blocks);
+        this.props.onBlockChange(transformBlockType);
       } else if (type === 'link') {
         if ((0, _toDom.hasInline)('link', editor.value)) {
           editor.command(this.unwrapLink);
@@ -91603,7 +91606,6 @@ var InlineToolbar = function (_React$Component) {
           this.setState({ link: true });
         }
       } else if (type === 'span') {
-        console.log("inlie: ", type);
         if ((0, _toDom.hasInline)(type, editor.value) && color === 'reset') {
           editor.unwrapInline(type);
         } else if ((0, _toDom.hasInline)(type, editor.value)) {
@@ -91915,6 +91917,17 @@ var RichText = function (_React$Component) {
     }
 
     /**
+     * When change somethin in toolbar
+     * @param {String} type 
+     */
+
+  }, {
+    key: 'onToolbarChange',
+    value: function onToolbarChange(type) {
+      console.log("change: ", type);
+    }
+
+    /**
      * Render the editor.
      *
      * @param {Object} props
@@ -91930,7 +91943,11 @@ var RichText = function (_React$Component) {
         _react.Fragment,
         null,
         children,
-        _react2.default.createElement(_InlineToolbar2.default, { setRef: this.setRef.bind(this), editor: editor })
+        _react2.default.createElement(_InlineToolbar2.default, {
+          onBlockChange: this.onToolbarChange.bind(this),
+          setRef: this.setRef.bind(this),
+          editor: editor
+        })
       );
     }
 
@@ -92140,10 +92157,9 @@ var RichText = function (_React$Component) {
 
       if (value.document != this.state.value.document) {
         content = _toDom.html.serialize(value);
-        console.log("content: ", content, value);
         if (this.props.multiline === false) {
+          console.log("tagL", tag);
           content = (0, _toDom.parsePlainContent)(content, tag);
-          // value = html.deserialize( content )
         }
       }
 
@@ -92166,9 +92182,7 @@ var RichText = function (_React$Component) {
   }, {
     key: 'onKeyDown',
     value: function onKeyDown(event, editor, next) {
-      console.log("key", event.keyCode);
       if (event.keyCode === _keycodes.ENTER) {
-
         return next();
       } else {
         return next();
@@ -92715,7 +92729,7 @@ var parsePlainContent = exports.parsePlainContent = function parsePlainContent(v
     var tagName = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
 
     if (tagName === '') return filterOnlyMarkup(value);
-    return '<' + tagName + '> ' + filterOnlyMarkup(value) + ' </' + tagName + '>';
+    return '<' + tagName + '>' + filterOnlyMarkup(value) + '</' + tagName + '>';
 };
 
 /***/ }),

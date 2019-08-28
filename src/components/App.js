@@ -17,8 +17,8 @@ export default class App extends React.Component {
                 <h4> State: {this.state.multiline ? 'multiline' : 'single line'} </h4>
                 <RichText
                     value={this.state.value}
-                    multiline={true}
-                    tagName='h3'
+                    multiline={false}
+                    tag='h3'
                     onChange={(value)=> this.setState({ value }) }
                     placeholder={'Write Text...'}
                 />

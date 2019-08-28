@@ -84,6 +84,14 @@ class RichText extends React.Component {
     }
 
     /**
+     * When change somethin in toolbar
+     * @param {String} type 
+     */
+    onToolbarChange(type){
+      console.log("change: ", type)
+    }
+
+    /**
      * Render the editor.
      *
      * @param {Object} props
@@ -96,7 +104,11 @@ class RichText extends React.Component {
       return (
         <Fragment>
           {children}
-          {<InlineToolbar setRef={this.setRef.bind(this)} editor={editor} /> }
+          {<InlineToolbar
+            onBlockChange={this.onToolbarChange.bind(this)}
+            setRef={this.setRef.bind(this)} 
+            editor={editor} 
+            /> }
         </Fragment>
       )
     }
@@ -209,10 +221,9 @@ class RichText extends React.Component {
       let { content, tag } = this.state;
       if (value.document != this.state.value.document) {
         content = html.serialize(value)
-        console.log("content: ", content, value)
         if( this.props.multiline === false ){
+          console.log("tagL", tag)
           content = parsePlainContent(content, tag)
-          // value = html.deserialize( content )
         }
       }
       
@@ -232,9 +243,7 @@ class RichText extends React.Component {
      * @param {func} next 
      */
     onKeyDown(event, editor, next){
-      console.log("key", event.keyCode)
       if( event.keyCode === ENTER ){
-         
           return next()
       } else {
         return next()

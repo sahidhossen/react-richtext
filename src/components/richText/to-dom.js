@@ -66,5 +66,5 @@ export const removeHtmlTag = ( htmlStr ) => {
 export const parsePlainContent = ( value, tagName = '' ) => {
     if( tagName === '' )
         return filterOnlyMarkup(value)
-    return `<${tagName}> ${filterOnlyMarkup(value)} </${tagName}>`
+    return `<${tagName}>${filterOnlyMarkup(value)}</${tagName}>`
 }
